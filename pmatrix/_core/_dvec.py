@@ -1,5 +1,5 @@
 import operator, itertools, copy
-from ._logiccore import LogicCore
+from ._logiccore import LogicCore, Timer
 
 class DVec(LogicCore):
     """
@@ -35,6 +35,7 @@ class DVec(LogicCore):
     The vector supports some fancy printing by print(DVec)
     """
     def __init__(self, data, dtype=None, orientation='c') -> None:
+        self.timer = Timer()
         self._format = "dvec"
         self.orientation = orientation
 
@@ -51,6 +52,7 @@ class DVec(LogicCore):
             raise TypeError(f"Not all data can be converted into {self.dtype.__name__}, {e}")
 
         self.length = len(data)
+        self.timer.time("reset")
 
     
     def __len__(self):
@@ -75,9 +77,14 @@ class DVec(LogicCore):
     __rmul__ = __mul__
 
     def __matmul__(self, other):
+        self.timer.time("reset")
         if not isinstance(other, DVec):
             return NotImplemented
-        return sum(self * other)
+        dot_sum = 0
+        for s, o in zip(self.data, other.data):
+            dot_sum += s * o
+        self.timer.time("dot sum")
+        return dot_sum
 
     def __truediv__(self, other):
         return self.__match_operator(other, operator.__truediv__)
@@ -259,6 +266,9 @@ class DVec(LogicCore):
         else:
             str_items = list(map(str, self.data))
         return str_items, max(map(len, str_items))
+    
+    def tolist(self):
+        return self.data
     
     @classmethod
     def arange(cls, *args):

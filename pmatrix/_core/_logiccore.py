@@ -52,3 +52,32 @@ class LogicCore:
             raise ValueError(f"Vector is 1D, can not use tuple")
         else:
             raise ValueError(f"Can only slice vector using, int, slice or list of int")
+        
+import time
+class Timer:
+    def __init__(self) -> None:
+        self.t = time.time()
+        self.timings = {}
+        self.rounds = {}
+    
+    def time(self, name):
+        self.timings[name] = self.timings.get(name, 0) + time.time() - self.t
+        self.rounds[name] = self.rounds.get(name, 0) + 1
+        self.t = time.time()
+
+    def add_timer(self, other):
+        for (k, timing), round in zip(other.timings.items(), other.rounds.values()):
+            self.timings[k] = self.timings.get(k, 0) + timing
+            self.rounds[k] = self.rounds.get(k, 0) + round
+
+    def __str__(self):
+        str_dict = {
+            k: {
+                "total":v,
+                "rounds": self.rounds[k],
+                "average": v/self.rounds[k]
+            }
+            for k, v in self.timings.items()
+            if k != "reset"
+        }
+        return str_dict.__str__()

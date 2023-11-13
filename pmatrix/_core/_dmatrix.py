@@ -1,7 +1,7 @@
 from __future__ import annotations
 from ._logiccore import LogicCore
 from ._dvec import DVec
-import operator, functools, time, itertools, random, copy
+import operator, functools, itertools, copy
 
 class DMatrix(LogicCore):
     """
@@ -68,7 +68,6 @@ class DMatrix(LogicCore):
     
     def _from_data(self, data, dtype=None):
         # Column vector
-        
         if not isinstance(data[0], list): 
             self.shape = (len(data), 1)
             self.data = DVec(data, dtype=dtype, orientation='c')
@@ -318,6 +317,7 @@ class DMatrix(LogicCore):
             dot_data = self.__matmul_self(DMatrix(other))
         else:
             return NotImplemented
+            
         if isinstance(dot_data, list):
             return DMatrix(data=dot_data)
         return dot_data
@@ -508,6 +508,10 @@ class DMatrix(LogicCore):
         else:
             self._force_orientation('c')
             return DMatrix(sum(self.data))
+        
+    def tolist(self):
+        self._force_orientation('r')
+        return [row_vec.tolist() for row_vec in self.data]
     
     @classmethod
     def arange(cls, *args):
